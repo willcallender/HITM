@@ -2,8 +2,9 @@ from scipy.integrate import solve_ivp
 import numpy as np
 import matplotlib.pyplot as plt
 import pickle
+from os import listdir, remove
 
-
+# numerical solver for the Kardar-Parisi-Zhang equation
 def kpz(h, t, c, dx, v, lamb, y=1):
     Gamma = np.empty_like(h)
     # second-order central
@@ -43,9 +44,22 @@ y0 = -(np.linspace(-1, 1)**2) + 1 # creates inverted parabola
 
 # function callable by scipy
 def f(t, y):
-    kpz(y, t, c, 1, v, lamb)
+    return kpz(y, t, c, 1, v, lamb)
 
 # solve over time and plot
 result = solve_ivp(f, [0, 1], y0, vectorized=True)
 with open('result.dat', 'wb') as f:
     pickle.dump(result, f)
+
+# delete all files from frames folder
+for fname in listdir('frames'):
+    remove(f'frames/{fname}')
+
+for i in range(result.y.shape[1]):
+    plt.clf()
+    plt.ylim(0, 1.5)
+    plt.plot(result.y[:,i])
+    plt.savefig(f'./frames/{i:03d}.png')
+plt.clf()
+plt.plot(result.y)
+plt.show()
