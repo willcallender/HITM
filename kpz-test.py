@@ -12,7 +12,7 @@ def kpz(h, t, c, dx, v, lamb, y=1):
     # second order forward
     Gamma[0] = h[2] + h[0] - 2*h[1]
     # second order backward
-    Gamma[-1] = Gamma[-1] + Gamma[-3] - 2*h[-2]
+    Gamma[-1] = h[-1] + h[-3] - 2*h[-2]
     
     # nonlinear term
     Psi = np.empty_like(h)
@@ -47,7 +47,7 @@ def f(t, y):
     return kpz(y, t, c, 1, v, lamb)
 
 # solve over time and plot
-result = solve_ivp(f, [0, 1], y0, vectorized=True)
+result = solve_ivp(f, [0, 1], y0, vectorized=True, max_step=0.01)
 with open('result.dat', 'wb') as f:
     pickle.dump(result, f)
 
