@@ -21,9 +21,9 @@ def show(*args, **kwargs):
 filename = 'firespreaddata/firstarrival.txt'
 
 # Load the data, convert to row-major order to prevent confusion and headaches
-firstArrivalTime = np.transpose(np.loadtxt(filename))
+firstArrivalTime = np.loadtxt(filename)# np.transpose(np.loadtxt(filename))
 firstArrivalTime = firstArrivalTime - np.min(firstArrivalTime)
-# print(set(list(data.flat)))
+# print(set(list(firstArrivalTime.flat)))
 # print(firstArrivalTime)
 print(firstArrivalTime.shape)
 # show(firstArrivalTime)
@@ -39,14 +39,15 @@ spread_masks = get_spread_mask(timestamps)
 # print(spread_masks.shape) # (101, 380, 340)
 # show(spread_masks[0], cmap='binary')
 
-# Create a video of the fire spread
+# # Create a video of the fire spread
 # for i, (t, mask) in enumerate(zip(timestamps, spread_masks)):
 #     plt.clf()
-#     show(mask * data + 100 * np.logical_not(mask), vmin=0, vmax=np.max(data))
+#     plt.imshow(mask * firstArrivalTime + 100 * np.logical_not(mask), vmin=0, vmax=np.max(firstArrivalTime))
 #     plt.title(f"Fire spread at {t}s")
 #     plt.tight_layout()
 #     # plt.show()
-#     plt.savefig(f'frames/{i:03}.p
+#     plt.savefig(f'frames/{i:03}.png')
+# exit()
 
 # use convolution to get the edge of the fire at each time step
 kernel = np.array([[1, 1, 1],
@@ -55,8 +56,10 @@ kernel = np.array([[1, 1, 1],
 edges = np.zeros_like(spread_masks)
 for i, (t, spread_mask) in enumerate(zip(timestamps, spread_masks)):
     edges[i] = (convolve2d(spread_mask, kernel, mode='same', boundary='fill', fillvalue=0) != 8) & spread_mask
-# show(edges[50], cmap='binary')
-# show(edge, cmap='hot')
+# plt.clf()
+# t = 30
+# plt.title(f'Fireline at t={t}')
+# show(edges[t], cmap='binary')
 # plt.show()
 
 # get first ignition area
@@ -101,16 +104,25 @@ for i, (t, spread_mask, edge) in enumerate(zip(timestamps, spread_masks, edges))
     # append the distance to the edge at each angle to currentSpread
     currentSpread.append((edgeAngles, edgeDists))
 
+t = 30
+plt.clf()
+plt.title(f'Radially unwrapped fire spread at t={t}')
+plt.scatter(currentSpread[t][0], currentSpread[t][1], s=1)
+plt.xlim(-np.pi, np.pi)
+plt.ylim(0, np.max(distances))
+plt.tight_layout()
+plt.show()
+
 # delete all files from frames folder
 for fname in listdir('frames'):
     remove(f'frames/{fname}')
 
-# plot the spread at each time step
-for i, spread in enumerate(currentSpread):
-    plt.clf()
-    plt.scatter(spread[0], spread[1], s=1)
-    plt.xlim(-np.pi, np.pi)
-    plt.ylim(0, np.max(distances))
-    plt.title(f"Fire spread at {i}s")
-    plt.tight_layout()
-    plt.savefig(f'frames/{i:03}.png')
+# # plot the spread at each time step
+# for i, spread in enumerate(currentSpread):
+#     plt.clf()
+#     plt.scatter(spread[0], spread[1], s=1)
+#     plt.xlim(-np.pi, np.pi)
+#     plt.ylim(0, np.max(distances))
+#     plt.title(f"Fire spread at {i}s")
+#     plt.tight_layout()
+#     plt.savefig(f'frames/{i:03}.png')
