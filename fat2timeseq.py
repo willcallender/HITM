@@ -1,7 +1,12 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.signal import convolve2d
-from os import listdir, remove
+from os import listdir, remove, system
+import pickle
+
+# delete all files from frames folder
+for fname in listdir('frames'):
+    remove(f'frames/{fname}')
 
 # Convenience imshow wrapper
 def show(*args, **kwargs):
@@ -22,6 +27,7 @@ filename = 'firespreaddata/firstarrival.txt'
 
 # Load the data, convert to row-major order to prevent confusion and headaches
 firstArrivalTime = np.loadtxt(filename)# np.transpose(np.loadtxt(filename))
+# subtract the minimum time to get the time since the first frame
 firstArrivalTime = firstArrivalTime - np.min(firstArrivalTime)
 # print(set(list(firstArrivalTime.flat)))
 # print(firstArrivalTime)
@@ -34,12 +40,12 @@ def get_spread_mask(timestamps):
         spread_mask[i, :] = firstArrivalTime <= timestamp
     return spread_mask
 
-timestamps = np.arange(101) # np.linspace(0, 100, 201)
+# Get the spread mask for each time step from 5 to 100
+timestamps = np.arange(5, 101)
 spread_masks = get_spread_mask(timestamps)
-# print(spread_masks.shape) # (101, 380, 340)
 # show(spread_masks[0], cmap='binary')
 
-# # Create a video of the fire spread
+# Create a video of the fire spread
 # for i, (t, mask) in enumerate(zip(timestamps, spread_masks)):
 #     plt.clf()
 #     plt.imshow(mask * firstArrivalTime + 100 * np.logical_not(mask), vmin=0, vmax=np.max(firstArrivalTime))
@@ -47,6 +53,10 @@ spread_masks = get_spread_mask(timestamps)
 #     plt.tight_layout()
 #     # plt.show()
 #     plt.savefig(f'frames/{i:03}.png')
+# # make video using command in mkvid.txt
+# with open('mkvid.txt') as f:
+#     command = f.read()
+# system(command)
 # exit()
 
 # use convolution to get the edge of the fire at each time step
@@ -92,7 +102,7 @@ for x in range(firstArrivalTime.shape[0]):
 # show(angles)
 
 # radially unwrap the distance to the edge at each time step
-currentSpread = []
+spread = []
 for i, (t, spread_mask, edge) in enumerate(zip(timestamps, spread_masks, edges)):
     # get the coordinates of the edge
     edgePoints = np.argwhere(edge)
@@ -101,24 +111,24 @@ for i, (t, spread_mask, edge) in enumerate(zip(timestamps, spread_masks, edges))
     # get the angle at each point
     edgeAngles = angles[edgePoints[:,0], edgePoints[:,1]]
     
-    # append the distance to the edge at each angle to currentSpread
-    currentSpread.append((edgeAngles, edgeDists))
+    # append the distance to the edge at each angle to spread
+    spread.append((edgeAngles, edgeDists))
+
+# pickle the spread data
+with open('spread.pickle', 'wb') as f:
+    pickle.dump(spread, f)
 
 t = 30
 plt.clf()
 plt.title(f'Radially unwrapped fire spread at t={t}')
-plt.scatter(currentSpread[t][0], currentSpread[t][1], s=1)
+plt.scatter(spread[t][0], spread[t][1], s=1)
 plt.xlim(-np.pi, np.pi)
 plt.ylim(0, np.max(distances))
 plt.tight_layout()
-plt.show()
-
-# delete all files from frames folder
-for fname in listdir('frames'):
-    remove(f'frames/{fname}')
+# plt.show()
 
 # # plot the spread at each time step
-# for i, spread in enumerate(currentSpread):
+# for i, spread in enumerate(spread):
 #     plt.clf()
 #     plt.scatter(spread[0], spread[1], s=1)
 #     plt.xlim(-np.pi, np.pi)
