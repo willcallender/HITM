@@ -1,6 +1,7 @@
 frames/*
 *.mp4
 *.dat
+*.pickle
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
