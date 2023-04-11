@@ -1,9 +1,16 @@
 import numpy as np
 from scipy.integrate import solve_ivp
+from scipy.integrate._ivp.ivp import OdeResult
+from numba import vectorize, jit, njit
+import numpy.typing as npt
 
+# ============================================================================ #
+#                    todo: why isn't `t` accessed in kpz?                      #
+# ============================================================================ #
 
-# numerical solver for the Kardar-Parisi-Zhang equation
-def kpz(h, t, c, dx, v, lamb, y=1, n=0):
+@vectorize
+def kpz(h: npt.NDArray[np.floating], t: npt.NDArray[np.integer], c: float, dx: float, v: float, lamb: float, y: int = 1, n: int = 0) -> npt.NDArray[np.floating]:
+# def kpz(h, t, c, dx, v, lamb, y=1, n=0):
     """Numerical solver for the Kardar-Parisi-Zhang equation
 
     Parameters
@@ -60,8 +67,9 @@ def kpz(h, t, c, dx, v, lamb, y=1, n=0):
     retval = c + 1/(dx**2) * (v*Gamma + Psi*lamb*0.5) + noise
     return retval
 
-
-def solveKPZ(h, t, a):
+# def solveKPZ(h, t, a):
+@jit
+def solveKPZ(h: npt.NDArray[np.floating], t: npt.NDArray[np.integer], a: npt.NDArray[np.floating]) -> OdeResult:
     """Find the height of the fireline at each time step based on the parameters a
 
     Parameters
