@@ -1,15 +1,13 @@
 import numpy as np
 from scipy.integrate import solve_ivp
 from scipy.integrate._ivp.ivp import OdeResult
-from numba import vectorize, jit, njit
+from numba import vectorize, jit, njit, guvectorize
 import numpy.typing as npt
+from numba.types import float64, int64
 
-# ============================================================================ #
-#                    todo: why isn't `t` accessed in kpz?                      #
-# ============================================================================ #
 
-@vectorize
-def kpz(h: npt.NDArray[np.floating], t: npt.NDArray[np.integer], c: float, dx: float, v: float, lamb: float, y: int = 1, n: int = 0) -> npt.NDArray[np.floating]:
+@guvectorize([(float64[:], float64, float64, float64, float64, float64[:])], '(n),(),(),(),()->(n)', nopython=True)
+def kpz(h: npt.NDArray[np.floating], c: float, dx: float, v: float, lamb: float, ret: npt.NDArray[np.floating] = None):
 # def kpz(h, t, c, dx, v, lamb, y=1, n=0):
     """Numerical solver for the Kardar-Parisi-Zhang equation
 
@@ -17,8 +15,6 @@ def kpz(h: npt.NDArray[np.floating], t: npt.NDArray[np.integer], c: float, dx: f
     ----------
     h : NDArray
         Initial height
-    t : NDArray
-        Array of initial and final times [t_0 t_final]
     c : float
         The constant c in the Kardar-Parisi-Zhang equation
     dx : float
@@ -27,16 +23,14 @@ def kpz(h: npt.NDArray[np.floating], t: npt.NDArray[np.integer], c: float, dx: f
         The constant v in the Kardar-Parisi-Zhang equation
     lamb : float
         The constant lambda in the Kardar-Parisi-Zhang equation
-    y : int, optional
-        Parameter used in the discretization of the non-linear term, by default 1
-    n : int, optional
-        The standard deviation of the Gaussian term, by default 0
 
     Returns
     -------
     NDArray
         The height at the next time step
     """
+    y = 1
+    n = 0
     Gamma = np.empty_like(h)
     # second-order central
     Gamma[1:-1] = h[2:] + h[:-2] - 2*h[1:-1]
@@ -58,19 +52,19 @@ def kpz(h: npt.NDArray[np.floating], t: npt.NDArray[np.integer], c: float, dx: f
     Psi[0] = Psi[1]
     Psi[-1] = Psi[-2]
     
-    if n:
-        # gaussian noise
-        noise = np.random.normal(0, n, h.shape)
-    else:
-        noise = np.zeros_like(h)
+    # if n:
+    #     # gaussian noise
+    #     noise = np.random.normal(0, n, h.shape)
+    # else:
+    #     noise = np.zeros_like(h)
         
-    retval = c + 1/(dx**2) * (v*Gamma + Psi*lamb*0.5) + noise
-    return retval
+    ret[:] = c + 1/(dx**2) * (v*Gamma + Psi*lamb*0.5) #+ noise
+    # return ret
 
 # def solveKPZ(h, t, a):
-@jit
+
 def solveKPZ(h: npt.NDArray[np.floating], t: npt.NDArray[np.integer], a: npt.NDArray[np.floating]) -> OdeResult:
-    """Find the height of the fireline at each time step based on the parameters a
+    """Find the height of the fireline at each time step based on the parameters in a
 
     Parameters
     ----------
@@ -87,11 +81,16 @@ def solveKPZ(h: npt.NDArray[np.floating], t: npt.NDArray[np.integer], a: npt.NDA
         The result of the ODE solver from scipy.integrate.solve_ivp
     """
     def kpz_wrapper(t, y):
-        return kpz(y, t, a[0], 1, a[1], a[2])
+        ret = np.empty_like(y)
+        kpz(y, a[0], 1, a[1], a[2], ret)
+        return ret
     
     timespan = (t[0], t[-1])
+    # t = t[1:-1]
+    # if len(t) == 0:
+    #     t = None
     # solve the ODE at all time steps
-    solution = solve_ivp(kpz_wrapper, timespan, h, t_eval=t, vectorized=True)
+    solution = solve_ivp(kpz_wrapper, timespan, h, t_eval=t) #, vectorized=True)
     return solution
 
 

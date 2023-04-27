@@ -4,6 +4,7 @@ frames/*
 *.pickle
 *.pkl
 archive/*
+dataset_*.mat
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
