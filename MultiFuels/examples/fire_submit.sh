@@ -12,4 +12,4 @@
 
 module load matlab
 
-matlab -nojvm -batch "batch_fire"
+/gpfs/home/wac20/MultiFuels/examples/fireLine_batch.sh
