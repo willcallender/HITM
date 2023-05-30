@@ -4,7 +4,7 @@ from scipy.integrate import solve_ivp
 from scipy.fft import fft, ifft
 from numba import njit, jit, vectorize, guvectorize
 import numba.types as nbt
-from numba.types import float64
+from numba import float64
 import traceback
 
 from typing import Tuple, Callable
@@ -20,7 +20,7 @@ TODO: FINISH DOCSTRINGS AND TYPE ANNOTATIONS
 
 # def err(a, x, t, h, ha):
 
-def err(a: npt.NDArray[np.floating], x: npt.NDArray[np.floating], t: npt.NDArray[np.integer], h: npt.NDArray[np.floating], ha: Callable[[npt.NDArray[np.floating], npt.NDArray[np.floating], npt.NDArray[np.integer], npt.NDArray[np.floating]], npt.NDArray[np.floating]]) -> float:
+def err(a: npt.NDArray[np.floating], x: npt.NDArray[np.floating], t: npt.NDArray[np.integer], h: npt.NDArray[np.floating], ha: Callable[[npt.NDArray[np.floating], npt.NDArray[np.floating], npt.NDArray[np.integer], npt.NDArray[np.floating]], npt.NDArray[np.floating]]) -> np.floating:
     """Calculate the error between the data and the model. This is equation 13 in Campos 2013.
 
     Parameters
@@ -80,7 +80,7 @@ def ha(a: npt.NDArray[np.floating], x: npt.NDArray[np.floating], t: npt.NDArray[
 
 # def inverse(h, t, n=100):
 
-def inverse(h: npt.NDArray[np.floating], t: npt.NDArray[np.floating], y_bounds: npt.NDArray[np.floating] = None, n: int = 100) -> Tuple[npt.NDArray[np.floating], npt.NDArray[np.floating], OptimizeResult, npt.NDArray[np.floating]]:
+def inverse(h: npt.NDArray[np.floating], t: npt.NDArray[np.floating], y_bounds: npt.NDArray[np.floating] | None = None, n: int = 100) -> Tuple[npt.NDArray[np.floating], npt.NDArray[np.floating], OptimizeResult, npt.NDArray[np.floating]]:
     """Inverse method for the Kardar-Parisi-Zhang equation
 
     Parameters
@@ -193,7 +193,7 @@ def truncate(data: npt.NDArray, bounds: npt.NDArray[np.integer]) -> npt.NDArray:
 
 # def runExperiment(spread, firstIdx, lastIdx, verifyIdx, x_bounds, n=100):
 
-def runExperiment(spread: npt.NDArray[np.floating], firstIdx: int, lastIdx: int, verifyIdx: npt.NDArray[np.integer], x_bounds: npt.NDArray[np.integer], y_bounds: npt.NDArray[np.floating] = None, n: int = 100) -> Tuple[npt.NDArray[np.floating], npt.NDArray[np.floating], npt.NDArray[np.floating], OptimizeResult, npt.NDArray[np.floating], list, npt.NDArray[np.floating]]:
+def runExperiment(spread: npt.NDArray[np.floating], firstIdx: int, lastIdx: int, verifyIdx: npt.NDArray[np.integer], x_bounds: npt.NDArray[np.integer], y_bounds: npt.NDArray[np.floating] | None = None, n: int = 100) -> Tuple[npt.NDArray[np.floating], npt.NDArray[np.floating], npt.NDArray[np.floating], OptimizeResult, npt.NDArray[np.floating], list, npt.NDArray[np.floating]]:
     """Fit the Kardar-Parisi-Zhang equation to the given data and compare to verification data
 
     Parameters

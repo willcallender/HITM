@@ -3,12 +3,11 @@ from scipy.integrate import solve_ivp
 from scipy.integrate._ivp.ivp import OdeResult
 from numba import vectorize, jit, njit, guvectorize
 import numpy.typing as npt
-from numba.types import float64, int64
+from numba import float64, int64
 
 
 @guvectorize([(float64[:], float64, float64, float64, float64, float64[:])], '(n),(),(),(),()->(n)', nopython=True)
-def kpz(h: npt.NDArray[np.floating], c: float, dx: float, v: float, lamb: float, ret: npt.NDArray[np.floating] = None):
-# def kpz(h, t, c, dx, v, lamb, y=1, n=0):
+def kpz(h: npt.NDArray[np.floating], c: float, dx: float, v: float, lamb: float, ret: npt.NDArray[np.floating]):
     """Numerical solver for the Kardar-Parisi-Zhang equation
 
     Parameters
@@ -23,6 +22,8 @@ def kpz(h: npt.NDArray[np.floating], c: float, dx: float, v: float, lamb: float,
         The constant v in the Kardar-Parisi-Zhang equation
     lamb : float
         The constant lambda in the Kardar-Parisi-Zhang equation
+    ret : NDArray
+        The array to store the result in
 
     Returns
     -------
@@ -52,13 +53,16 @@ def kpz(h: npt.NDArray[np.floating], c: float, dx: float, v: float, lamb: float,
     Psi[0] = Psi[1]
     Psi[-1] = Psi[-2]
     
-    # if n:
-    #     # gaussian noise
-    #     noise = np.random.normal(0, n, h.shape)
-    # else:
-    #     noise = np.zeros_like(h)
+    # exponential distribution
+    noise = np.random.exponential(1, size=h.shape)
+    
+    # normal distribution
+    # noise = np.random.normal(0, 1, size=h.shape)
+    
+    # absolute normal
+    # noise = np.abs(np.random.normal(0, 1, size=h.shape))
         
-    ret[:] = c + 1/(dx**2) * (v*Gamma + Psi*lamb*0.5) #+ noise
+    ret[:] = c + 1/(dx**2) * (v*Gamma + Psi*lamb*0.5) + noise
     # return ret
 
 # def solveKPZ(h, t, a):
