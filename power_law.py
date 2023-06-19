@@ -3,19 +3,25 @@ import pickle
 from matplotlib import pyplot as plt
 from scipy.optimize import curve_fit
 from scipy.stats import norm
+from scipy import stats
 
 filename = "spread.pkl"
+conf = 0.99
+
+x_bounds = np.array([100, 250])
+t_bounds = np.array([30, 40])
+# t_bounds = np.array([30, 31])
+
 with open(filename, "rb") as f:
     spread = pickle.load(f)
 spread = np.array(spread, float)
 print(spread.shape)
 
-x_bounds = np.array([100, 250])
-t_bounds = np.array([10, 80])
 y_bounds = np.array([0, spread.max()], float)
 
 width = x_bounds[1] - x_bounds[0]
 maxL = width // 3
+params_time = np.zeros((t_bounds[1] - t_bounds[0], 2))
 # sweep through length scales
 deviations = np.zeros(maxL)
 num_samples = np.zeros(maxL)
@@ -31,38 +37,26 @@ def power_law(x, a, b):
     return a * x ** b
 
 x = np.arange(maxL)# + 1
-y = deviations / num_samples
+y = np.sqrt(deviations / num_samples)
 
-# print(deviations / num_samples)
 
-# Fit the data to the power law function
-params, cov = curve_fit(power_law, x, y)
+x = np.log(np.arange(maxL) + 1)
+y = np.log(np.sqrt(deviations / num_samples))
 
-# Extract the parameters and their uncertainties
-a, b = params
-sigma_a, sigma_b = np.sqrt(np.diag(cov))
-
-# Calculate confidence intervals
-conf = 0.95
+slope, intercept, r_value, p_value, std_err = stats.linregress(x,y)
+# 99% confidence interval
 alpha = 1 - conf # significance level
-z_critical = np.abs(norm.ppf(alpha / 2))  # z-score for two-tailed test
-
+z_critical = np.abs(stats.norm.ppf(alpha / 2))  # z-score for two-tailed test
 # Calculate confidence intervals for a and b
-a_interval = (a - z_critical * sigma_a, a + z_critical * sigma_a)
-b_interval = (b - z_critical * sigma_b, b + z_critical * sigma_b)
-
+a_interval = (intercept - z_critical * std_err, intercept + z_critical * std_err)
+b_interval = (slope - z_critical * std_err, slope + z_critical * std_err)
 print("a Confidence Interval:", a_interval)
 print("b Confidence Interval:", b_interval)
 
-# Plot the fitted function
 plt.title("Power Law Fit")
-plt.ylabel("W(L)")
-plt.xlabel("L")
-plt.loglog(y)
-plt.loglog(power_law(x, *params))
-plt.legend(["Data", "Fit $y = {:.3f}x^{{{:.3f}}}$".format(a, b)])
-a_interval_rounded = tuple(round(x, 3) for x in a_interval)
-b_interval_rounded = tuple(round(x, 3) for x in b_interval)
-plt.text(0.1, 0.1, f"a {conf*100:.0f}% CI: {a_interval_rounded}\nb {conf*100:.0f}% CI: {b_interval_rounded}", transform=plt.gca().transAxes)
-
-plt.show()
+plt.ylabel("$log(W(L))$")
+plt.xlabel("$log(L)$")
+plt.plot(x, y, "o")
+plt.plot(x, intercept + slope * x)
+plt.legend(["Data", "Fit $y = {:.3f}x + {:.3f}$".format(slope, intercept)])
+plt.text(0.1, 0.1, f"a {conf*100:.0f}% CI: {a_interval}\nb {conf*100:.0f}% CI: {b_interval}", transform=plt.gca().transAxes)

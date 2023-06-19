@@ -98,3 +98,26 @@ def solveKPZ(h: npt.NDArray[np.floating], t: npt.NDArray[np.integer], a: npt.NDA
     return solution
 
 
+# def biharmonic():
+#     """Numerical solver for the Kardar-Parisi-Zhang equation with biharmonic term
+
+#     Parameters
+#     ----------
+#     h : NDArray
+#         Initial height
+#     c : float
+#         The constant c in the Kardar-Parisi-Zhang equation
+#     dx : float
+#         The spacing between points in the x direction
+#     v : float
+#         The constant v in the Kardar-Parisi-Zhang equation
+#     lamb : float
+#         The constant lambda in the Kardar-Parisi-Zhang equation
+#     ret : NDArray
+#         The array to store the result in
+
+#     Returns
+#     -------
+#     NDArray
+#         The height at the next time step
+#     """
