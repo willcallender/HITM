@@ -54,7 +54,7 @@ def kpz(h: npt.NDArray[np.floating], c: float, dx: float, v: float, lamb: float,
     Psi[-1] = Psi[-2]
     
     # exponential distribution
-    noise = np.random.exponential(1, size=h.shape)
+    # noise = np.random.exponential(1, size=h.shape)
     
     # normal distribution
     # noise = np.random.normal(0, 1, size=h.shape)
@@ -62,7 +62,7 @@ def kpz(h: npt.NDArray[np.floating], c: float, dx: float, v: float, lamb: float,
     # absolute normal
     # noise = np.abs(np.random.normal(0, 1, size=h.shape))
         
-    ret[:] = c + 1/(dx**2) * (v*Gamma + Psi*lamb*0.5) + noise
+    ret[:] = c + 1/(dx**2) * (v*Gamma + Psi*lamb*0.5) #+ noise
     # return ret
 
 # def solveKPZ(h, t, a):
