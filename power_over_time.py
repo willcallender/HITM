@@ -8,10 +8,17 @@ from scipy import stats
 
 filename = "spread.pkl"
 conf = 0.99
+# # auto determine bounds
+x_bounds = None
+t_bounds = None
+
+# # bounds for real data
 # x_bounds = np.array([100, 250])
 # t_bounds = np.array([10, 50])
-x_bounds = np.array([0, 100])
-t_bounds = np.array([0, 100])
+
+# # bounds for simulated data
+# x_bounds = np.array([0, 100])
+# t_bounds = np.array([0, 100])
 
 def power_law(x, a, b):
     return a * x ** b
@@ -22,6 +29,10 @@ spread = np.array(spread, float)
 print(spread.shape)
 
 y_bounds = np.array([0, spread.max()], float)
+if x_bounds is None:
+    x_bounds = np.array([0, spread.shape[2]], int)
+if t_bounds is None:
+    t_bounds = np.array([0, spread.shape[0]], int)
 
 width = x_bounds[1] - x_bounds[0]
 maxL = width // 3

@@ -258,13 +258,6 @@ def runExperiment(spread: npt.NDArray[np.floating], firstIdx: int, lastIdx: int,
         t[1] = id
         final = solveKPZ(h[0], t, a_opt)
         finals.append(final)
-        # try:
-        #     errs[i] = verifyh - final.y[:, -1]
-        # except TypeError as e:
-        #     print(errs, i, verifyh, final, type(errs), type(i), type(verifyh), type(final.y), sep='\n')
-        #     print(firstIdx, lastIdx, verifyIdx, x_bounds, y_bounds, n, sep='\n')
-        #     traceback.print_exc()
-        #     raise e
         errs[i] = verifyh - final.y[:, -1]
     
     return h[0], h[1], verifyhs, ha_result, y_bounds, finals, errs
