@@ -5,6 +5,7 @@ frames/*
 *.pkl
 archive/*
 dataset_*.mat
+.vscode
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
