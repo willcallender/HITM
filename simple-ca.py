@@ -5,7 +5,7 @@ import time
 import pickle
 
 
-n = 1000
+n = 100
 T = 100
 ignition_prob = 0.5
 

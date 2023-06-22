@@ -97,15 +97,15 @@ for t in range(t_bounds[0], t_bounds[1]):
     plt.savefig(f"frames/{t-t_bounds[0]:03d}.png")
     # plt.show()
 
-# # plot b vs time
-# plt.clf()
-# plt.plot(np.arange(t_bounds[0], t_bounds[1]), b_time)
-# plt.fill_between(np.arange(t_bounds[0], t_bounds[1]), CI[:, 1], CI[:, 0], alpha=0.4)
-# plt.title("Power Law Fit vs Time")
-# plt.xlabel("Time")
-# plt.ylabel("Slope ($b$)")
-# plt.legend(["Fit"])
-# plt.show()
+# plot b vs time
+plt.clf()
+plt.plot(np.arange(t_bounds[0], t_bounds[1]), b_time)
+plt.fill_between(np.arange(t_bounds[0], t_bounds[1]), CI[:, 1], CI[:, 0], alpha=0.4)
+plt.title("Power Law Fit vs Time")
+plt.xlabel("Time")
+plt.ylabel("Slope ($b$)")
+plt.legend(["Fit"])
+plt.show()
 
 from os import system
 system("ffmpeg -y -framerate 1 -i frames/%03d.png -c:v libx264 -r 5 -pix_fmt yuv420p out.mp4")
