@@ -67,8 +67,9 @@ def ha(a: npt.NDArray[np.floating], x: npt.NDArray[np.floating], t: npt.NDArray[
         Array of initial and final heights [h_0 h_final]. Must be of shape (2, len(x))
     """
     dx = x[1] - x[0]
-    if np.any(np.diff(x) != dx):
-        raise ValueError("x must be uniformly spaced")
+    # if np.any(np.diff(x) != dx):
+    #     raise ValueError("x must be uniformly spaced")
+    # was getting confused when diff(x) varied by < 1e-16
     
     def kpz_wrapper(t: float, y: npt.NDArray[np.floating]) -> npt.NDArray[np.floating]:
         ret = np.zeros_like(y)
@@ -114,12 +115,12 @@ def inverse(h: npt.NDArray[np.floating], t: npt.NDArray[np.floating], y_bounds: 
     
     # initialize parameters and normalize data
     # initialize parameters
-    a = np.array([1, 1, 1]) # c v lambda
+    a = np.array([1.0, 1.0, 1.0]) # c v lambda
     h = np.array([firsth_smooth, lasth_smooth])
 
     # normalize the data
-    # x = np.linspace(0, 1, len(firsth_smooth))
-    x = np.arange(0, len(firsth_smooth)).astype(float)
+    x = np.linspace(0, 1, len(firsth_smooth))
+    # x = np.arange(0, len(firsth_smooth)).astype(float)
     if y_bounds is None:
         y_bounds = np.array([h.min(), h.max()])
     h = normalize(h, y_bounds)
@@ -193,7 +194,7 @@ def truncate(data: npt.NDArray, bounds: npt.NDArray[np.integer]) -> npt.NDArray:
 
 # def runExperiment(spread, firstIdx, lastIdx, verifyIdx, x_bounds, n=100):
 
-def runExperiment(spread: npt.NDArray[np.floating], firstIdx: int, lastIdx: int, verifyIdx: npt.NDArray[np.integer], x_bounds: npt.NDArray[np.integer], y_bounds: npt.NDArray[np.floating] | None = None, n: int = 100) -> Tuple[npt.NDArray[np.floating], npt.NDArray[np.floating], npt.NDArray[np.floating], OptimizeResult, npt.NDArray[np.floating], list, npt.NDArray[np.floating]]:
+def runExperiment(spread: npt.NDArray[np.floating], firstIdx: int, lastIdx: int, verifyIdx: npt.NDArray[np.integer], x_bounds: npt.NDArray[np.integer] | None = None, y_bounds: npt.NDArray[np.floating] | None = None, n: int = 100) -> Tuple[npt.NDArray[np.floating], npt.NDArray[np.floating], npt.NDArray[np.floating], OptimizeResult, npt.NDArray[np.floating], list, npt.NDArray[np.floating]]:
     """Fit the Kardar-Parisi-Zhang equation to the given data and compare to verification data
 
     Parameters
@@ -237,6 +238,9 @@ def runExperiment(spread: npt.NDArray[np.floating], firstIdx: int, lastIdx: int,
     """
     firsth = spread[firstIdx][1]
     lasth = spread[lastIdx][1]
+
+    if x_bounds is None:
+        x_bounds = np.array([0, len(firsth)])
     
     firsth = truncate(firsth, x_bounds)
     lasth = truncate(lasth, x_bounds)

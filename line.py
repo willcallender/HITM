@@ -2,8 +2,9 @@ import numpy as np
 from scipy import stats
 from matplotlib import pyplot as plt
 from scipy.optimize import minimize
+from numba import jit, njit
 
-n = 100
+n = 1000
 conf = 0.99
 # H = np.random.uniform(-1, 1, n)
 # H = np.random.normal(0, 1, n)
@@ -18,14 +19,16 @@ conf = 0.99
 
 # H = np.cumsum(H)
 
-x_bounds = np.array([0, n])
+x_bounds = np.array([0, 10])
 width = x_bounds[1] - x_bounds[0]
-maxL = int(n/3)
+maxL = int(width/3)
+# maxL = 3
 
 def err(H):
     x, y, slope, intercept, r_value, p_value, std_err, a_interval, b_interval = fit(H)
     return -slope #np.abs(slope - 0.7)
 
+# @njit
 def fit(H):
     deviations = np.zeros(maxL)
     num_samples = np.zeros(maxL)
@@ -33,6 +36,7 @@ def fit(H):
         for i in range(x_bounds[0], x_bounds[0] + width - L):
             h = H[i : i + L + 1]
             W = np.mean((h - np.mean(h)) ** 2)
+            assert np.isnan(W) == False
             deviations[L - 1] += W
             num_samples[L - 1] += 1
 
@@ -80,8 +84,12 @@ def plot(x, y, slope, intercept, a_interval, b_interval):
     plt.subplots_adjust(hspace=0.5)
     plt.show()
 
-# x, y, slope, intercept, r_value, p_value, std_err, a_interval, b_interval = fit(H)
-# plot(x, y, slope, intercept, a_interval, b_interval)
+# H = np.sin(1 * np.pi * np.linspace(0, 10, n) / 10)
+x = np.linspace(0, 10, n)
+# H = 1 * x * (10 - x)
+# H = 1/10 * (17 *L**6 - (101*L**5)/9 - (232*L**4)/9 + (1000 L^3)/9 + (10000 L^2)/3 - (20000 L)/3 + 10000/3) sqrt(x)
+x, y, slope, intercept, r_value, p_value, std_err, a_interval, b_interval = fit(H)
+plot(x, y, slope, intercept, a_interval, b_interval)
 
 def genErr(x, rand):
     np.random.seed(0)
@@ -125,12 +133,12 @@ def genErr(x, rand):
 # rand = np.random.lognormal
 # x0 = np.array([0, 1])
 
-minResult = minimize(genErr, x0, (rand))
-print(minResult)
+# minResult = minimize(genErr, x0, (rand))
+# print(minResult)
 
-H = rand(*minResult.x, n)
-# H = np.cumsum(H)
-m, b = np.polyfit(np.arange(n), H, 1)
-H = H - (m * np.arange(n) + b)
-x, y, slope, intercept, r_value, p_value, std_err, a_interval, b_interval = fit(H)
-plot(x, y, slope, intercept, a_interval, b_interval)
+# H = rand(*minResult.x, n)
+# # H = np.cumsum(H)
+# m, b = np.polyfit(np.arange(n), H, 1)
+# H = H - (m * np.arange(n) + b)
+# x, y, slope, intercept, r_value, p_value, std_err, a_interval, b_interval = fit(H)
+# plot(x, y, slope, intercept, a_interval, b
