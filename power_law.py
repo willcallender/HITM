@@ -49,6 +49,8 @@ def PLfit(h, x_bounds: npt.NDArray[np.floating] | None = None, y_bounds: npt.NDA
         plt.legend(["Data", "Fit $y = {:.3f}x + {:.3f}$".format(slope, intercept)])
         plt.text(0.1, 0.1, f"{conf*100:.0f}% CI: {slope_interval}", transform=plt.gca().transAxes)
         plt.show()
+    
+    return slope, slope_interval, intercept, r_value, p_value, stderr_slope
 
 
 if __name__ == "__main__":    
@@ -66,5 +68,7 @@ if __name__ == "__main__":
     # PLfit(spread[t, 1, :], x_bounds, conf=conf, plot=True)
 
     x = np.linspace(0, 1)
-    h = x*(1-x)
+
+    # h = x*(1-x)
+
     PLfit(h, plot=True)
