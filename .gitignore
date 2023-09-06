@@ -1,3 +1,4 @@
+# Custom / manual
 frames/*
 *.mp4
 *.dat
@@ -5,7 +6,7 @@ frames/*
 *.pkl
 archive/*
 dataset_*.mat
-.vscode
+.vscode/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
