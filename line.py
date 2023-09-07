@@ -15,11 +15,11 @@ conf = 0.99
 # H = np.random.beta(1, 1, n)
 # H = np.random.chisquare(1, n)
 # H = np.random.triangular(0, 1, 1, n)
-# H = np.random.lognormal(0, 1, n)
+H = np.random.lognormal(0, 1, n)
 
 # H = np.cumsum(H)
 
-x_bounds = np.array([0, 10])
+x_bounds = np.array([0, 100])
 width = x_bounds[1] - x_bounds[0]
 maxL = int(width/3)
 # maxL = 3
@@ -36,7 +36,7 @@ def fit(H):
         for i in range(x_bounds[0], x_bounds[0] + width - L):
             h = H[i : i + L + 1]
             W = np.mean((h - np.mean(h)) ** 2)
-            assert np.isnan(W) == False
+            assert np.isnan(W) is False
             deviations[L - 1] += W
             num_samples[L - 1] += 1
 
@@ -65,7 +65,7 @@ def plot(x, y, slope, intercept, a_interval, b_interval):
     # plot
     plt.clf()
     plt.subplot(211)
-    plt.title(f"Power Law Fit")
+    plt.title("Power Law Fit")
     plt.ylabel("$log(W(L))$)")
     plt.xlabel("$log(L)$")
     plt.plot(x, y, "o")
