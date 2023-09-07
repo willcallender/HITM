@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import sympy as sp
 from sympy.abc import x
 from scipy import stats
+from power_law import PLfit
 
 def W(h, L):
     W = sp.sqrt(sp.integrate((h - (sp.integrate(h, (x, 0, L)) / L))**2, (x, 0, L)) / L)
@@ -18,7 +19,6 @@ plt.legend(["$x$", "$x^2$"])
 # plt.show()
 plt.clf()
 
-from power_law import PLfit
 x = np.linspace(0, 10)
 h = x
 PLfit(h, plot=True)
